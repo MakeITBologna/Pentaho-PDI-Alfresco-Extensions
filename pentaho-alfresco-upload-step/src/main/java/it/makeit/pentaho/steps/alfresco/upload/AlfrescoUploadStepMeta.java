@@ -7,11 +7,14 @@ import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.annotations.Step;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.injection.Injection;
 import org.pentaho.di.core.injection.InjectionSupported;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
@@ -78,6 +81,29 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 		return new AlfrescoUploadStepData();
 	}
 
+	@Override
+	public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore metaStore) throws KettleStepException {
+		
+		ValueMetaInterface v1 = new ValueMetaString( outputStatus );
+	    v1.setTrimType( ValueMetaInterface.TRIM_TYPE_BOTH );
+	    v1.setOrigin( name );
+	    inputRowMeta.addValueMeta( v1 );
+	    
+	    ValueMetaInterface v2 = new ValueMetaString( outputError );
+	    v2.setTrimType( ValueMetaInterface.TRIM_TYPE_BOTH );
+	    v2.setOrigin( name );
+	    inputRowMeta.addValueMeta( v2 );
+	    
+	    
+	    ValueMetaInterface v3 = new ValueMetaString( outputObjectId );
+	    v3.setTrimType( ValueMetaInterface.TRIM_TYPE_BOTH );
+	    v3.setOrigin( name );
+	    inputRowMeta.addValueMeta( v3 );
+	    
+	    
+	}
+	
+	
 	// serializzazione dello step in xml
 	public String getXML() throws KettleValueException {
 		StringBuilder xml = new StringBuilder();

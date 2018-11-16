@@ -22,6 +22,10 @@
 
 package it.makeit.pentaho.steps.alfresco.upload;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.chemistry.opencmis.client.api.Session;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepData;
 import org.pentaho.di.trans.step.StepDataInterface;
@@ -33,6 +37,8 @@ public class AlfrescoUploadStepData extends BaseStepData implements StepDataInte
   int outputStatusIndex;
   int outputErrorIndex;
   int outputObjectIdIndex;
+  
+  Map<String, Session> sessionsPerUser = new HashMap<>();
 
   public AlfrescoUploadStepData() {
     super();
