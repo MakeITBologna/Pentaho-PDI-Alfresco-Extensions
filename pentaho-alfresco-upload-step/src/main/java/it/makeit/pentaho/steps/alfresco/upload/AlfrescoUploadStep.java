@@ -44,11 +44,13 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
-public class AlfrescoStep extends BaseStep implements StepInterface {
+import it.makeit.pentaho.steps.alfresco.upload.helper.AlfrescoUploadStepHelper;
+
+public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 
 	private static final Class<?> PKG = AlfrescoUploadStepMeta.class; // for i18n purposes
 
-	public AlfrescoStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
+	public AlfrescoUploadStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
 		super(s, stepDataInterface, c, t, dis);
 	}
 
@@ -139,14 +141,14 @@ public class AlfrescoStep extends BaseStep implements StepInterface {
 			String sessionKey = cmisUrl + "_" + cmisUser;
 			Session session = data.sessionsPerUser.get(sessionKey);
 			if (!data.sessionsPerUser.containsKey(sessionKey)) {
-				session = AlfrescoStepHelper.createSession(cmisUrl, cmisUser, cmisPassword);
+				session = AlfrescoUploadStepHelper.createSession(cmisUrl, cmisUser, cmisPassword);
 				data.sessionsPerUser.put(sessionKey, session);
 			}
 
 			String fileUpload = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getFileUpload())];
 			String cmisDirectory = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisDirectory())];
 
-			Folder folder = AlfrescoStepHelper.getOrCreateFolderByPath(session, cmisDirectory);
+			Folder folder = AlfrescoUploadStepHelper.getOrCreateFolderByPath(session, cmisDirectory);
 
 			File file = new File(fileUpload);
 			if (!file.exists()) {
@@ -154,7 +156,7 @@ public class AlfrescoStep extends BaseStep implements StepInterface {
 			}
 			inputStream = new FileInputStream(file);
 
-			Document document = AlfrescoStepHelper.createDocument(session, folder.getId(), file.getName(), -1, "application/octet-stream", inputStream, new HashMap<>(), null, "cmis:document");
+			Document document = AlfrescoUploadStepHelper.createDocument(session, folder.getId(), file.getName(), -1, "application/octet-stream", inputStream, new HashMap<>(), null, "cmis:document");
 
 			outputRow[data.outputStatusIndex] = "ok";
 			outputRow[data.outputObjectIdIndex] = document.getId();

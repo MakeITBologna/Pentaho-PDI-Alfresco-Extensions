@@ -73,7 +73,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 
 	@Override
 	public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta, Trans trans) {
-		return new AlfrescoStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
+		return new AlfrescoUploadStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
 	}
 
 	@Override
