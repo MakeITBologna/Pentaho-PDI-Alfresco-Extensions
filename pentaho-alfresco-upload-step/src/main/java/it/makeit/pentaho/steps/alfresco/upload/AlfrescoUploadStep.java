@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
@@ -44,11 +45,16 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
-public class AlfrescoStep extends BaseStep implements StepInterface {
+import com.google.common.base.Strings;
+
+import it.makeit.pentaho.steps.alfresco.upload.helper.AlfrescoUploadStepHelper;
+import it.makeit.pentaho.steps.alfresco.upload.helper.AlfrescoUploadStepJsonHelper;
+
+public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 
 	private static final Class<?> PKG = AlfrescoUploadStepMeta.class; // for i18n purposes
 
-	public AlfrescoStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
+	public AlfrescoUploadStep(StepMeta s, StepDataInterface stepDataInterface, int c, TransMeta t, Trans dis) {
 		super(s, stepDataInterface, c, t, dis);
 	}
 
@@ -82,31 +88,31 @@ public class AlfrescoStep extends BaseStep implements StepInterface {
 			first = false;
 
 			// necessario per passare i dati da input ad output
-			data.outputRowMeta = (RowMetaInterface) getInputRowMeta().clone();
+			data.outputRowMeta = (RowMetaInterface) getInputRowMeta().clone(); // clonare come da esempio
 			meta.getFields(data.outputRowMeta, getStepname(), null, null, this, null, null);
 
 			// gestione degli errori e campi invalidi
 			List<String> errors = new ArrayList<String>();
 
-			if (meta.getCmisUrl() == null || getInputRowMeta().indexOfValue(meta.getCmisUrl()) == -1) {
+			if (meta.getCmisUrl() == null || data.outputRowMeta.indexOfValue(meta.getCmisUrl()) == -1) {
 				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisUrl")));
 			}
 
-			if (meta.getCmisUser() == null || getInputRowMeta().indexOfValue(meta.getCmisUser()) == -1) {
+			if (meta.getCmisUser() == null || data.outputRowMeta.indexOfValue(meta.getCmisUser()) == -1) {
 				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisUser")));
 			}
 
-			if (meta.getCmisPassword() == null || getInputRowMeta().indexOfValue(meta.getCmisPassword()) == -1) {
+			if (meta.getCmisPassword() == null || data.outputRowMeta.indexOfValue(meta.getCmisPassword()) == -1) {
 				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisPassword")));
 			}
 
-			if (meta.getFileUpload() == null || getInputRowMeta().indexOfValue(meta.getFileUpload()) == -1) {
+			if (meta.getFileUpload() == null || data.outputRowMeta.indexOfValue(meta.getFileUpload()) == -1) {
 				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.fileUpload")));
 			}
-			if (meta.getCmisDirectory() == null || getInputRowMeta().indexOfValue(meta.getCmisDirectory()) == -1) {
+			if (meta.getCmisDirectory() == null || data.outputRowMeta.indexOfValue(meta.getCmisDirectory()) == -1) {
 				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisDirectory")));
 			}
-
+			
 			data.outputStatusIndex = data.outputRowMeta.indexOfValue(meta.getOutputStatus());
 			if (data.outputStatusIndex == -1) {
 				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoOutputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.outputStatus")));
@@ -130,8 +136,10 @@ public class AlfrescoStep extends BaseStep implements StepInterface {
 
 		Object[] outputRow = RowDataUtil.resizeArray(r, data.outputRowMeta.size());
 
+		
 		FileInputStream inputStream = null;
 		try {
+			List<String> errors = new ArrayList<>();
 			String cmisUrl = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisUrl())];
 			String cmisUser = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisUser())];
 			String cmisPassword = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisPassword())];
@@ -139,22 +147,51 @@ public class AlfrescoStep extends BaseStep implements StepInterface {
 			String sessionKey = cmisUrl + "_" + cmisUser;
 			Session session = data.sessionsPerUser.get(sessionKey);
 			if (!data.sessionsPerUser.containsKey(sessionKey)) {
-				session = AlfrescoStepHelper.createSession(cmisUrl, cmisUser, cmisPassword);
+				session = AlfrescoUploadStepHelper.createSession(cmisUrl, cmisUser, cmisPassword);
 				data.sessionsPerUser.put(sessionKey, session);
 			}
 
 			String fileUpload = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getFileUpload())];
 			String cmisDirectory = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisDirectory())];
 
-			Folder folder = AlfrescoStepHelper.getOrCreateFolderByPath(session, cmisDirectory);
+			String cmisDocType = meta.getCmisDocumentType() != null ? (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisDocumentType())] : null; 
+			cmisDocType = !Strings.isNullOrEmpty(cmisDocType) ? cmisDocType : "cmis:document";
+			
+			String cmisProperties = meta.getCmisProperties() != null ? (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisProperties())] : null;
+
+			if(Strings.isNullOrEmpty(cmisUrl)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisUrl")));
+			if(Strings.isNullOrEmpty(cmisUser)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisUser")));
+			if(Strings.isNullOrEmpty(cmisPassword)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisPassword")));
+			
+			if(Strings.isNullOrEmpty(fileUpload)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.fileUpload")));
+			if(Strings.isNullOrEmpty(cmisDirectory)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisDirectory")));
+			
+			
+			Map<String, Object> propertiesMap = AlfrescoUploadStepJsonHelper.jsonProperties(cmisProperties);
+			
+			Folder folder = AlfrescoUploadStepHelper.getOrCreateFolderByPath(session, cmisDirectory);
 
 			File file = new File(fileUpload);
 			if (!file.exists()) {
 				throw new java.io.FileNotFoundException(file.getAbsolutePath());
 			}
 			inputStream = new FileInputStream(file);
-
-			Document document = AlfrescoStepHelper.createDocument(session, folder.getId(), file.getName(), -1, "application/octet-stream", inputStream, new HashMap<>(), null, "cmis:document");
+			
+			Document document = null;
+			try {
+				document = AlfrescoUploadStepHelper.createDocument(session, folder.getId(), file.getName(), -1, "application/octet-stream", inputStream, new HashMap<String, Object>(), new ArrayList<>(), cmisDocType);
+			
+				if(!propertiesMap.isEmpty()) { // per gestione aspetti
+					AlfrescoUploadStepHelper.updateDocumentProperties(session, document.getId(), propertiesMap);
+				}
+			
+			} catch(Exception e) {
+				// su indicazione di Riccardo Arzenton
+				if(document != null) {
+					AlfrescoUploadStepHelper.deleteDocument(session, document.getId(),true);
+				}
+				throw e;
+			}
 
 			outputRow[data.outputStatusIndex] = "ok";
 			outputRow[data.outputObjectIdIndex] = document.getId();

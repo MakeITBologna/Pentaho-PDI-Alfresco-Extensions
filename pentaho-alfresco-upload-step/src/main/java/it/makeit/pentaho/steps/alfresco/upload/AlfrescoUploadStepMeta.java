@@ -51,9 +51,12 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 
 	@Injection(name = "FILE_UPLOAD")
 	private String fileUpload;
-
 	@Injection(name = "CMIS_DIRECTORY")
 	private String cmisDirectory;
+	@Injection(name = "CMIS_DOCUMENT_TYPE")
+	private String cmisDocumentType;
+	@Injection(name = "CMIS_PROPERTIES")
+	private String cmisProperties;
 
 	@Injection(name = "OUTPUT_STATUS")
 	private String outputStatus;
@@ -73,7 +76,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 
 	@Override
 	public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta, Trans trans) {
-		return new AlfrescoStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
+		return new AlfrescoUploadStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
 	}
 
 	@Override
@@ -115,6 +118,9 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 		xml.append(XMLHandler.addTagValue("fileUpload", fileUpload));
 		xml.append(XMLHandler.addTagValue("cmisDirectory", cmisDirectory));
 
+		xml.append(XMLHandler.addTagValue("cmisDocumentType", cmisDocumentType));
+		xml.append(XMLHandler.addTagValue("cmisProperties", cmisProperties));
+		
 		xml.append(XMLHandler.addTagValue("outputStatus", outputStatus));
 		xml.append(XMLHandler.addTagValue("outputError", outputError));
 		xml.append(XMLHandler.addTagValue("outputObjectId", outputObjectId));
@@ -131,9 +137,14 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 			setFileUpload(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "fileUpload")));
 			setCmisDirectory(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisDirectory")));
 
+			setCmisDocumentType(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisDocumentType")));
+			setCmisProperties(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisProperties")));
+
 			setOutputStatus(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "outputStatus")));
 			setOutputError(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "outputError")));
 			setOutputObjectId(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "outputObjectId")));
+			
+			
 		} catch (Exception e) {
 			throw new KettleXMLException("Alfresco Upload Step plugin unable to read step info from XML node", e);
 		}
@@ -149,6 +160,9 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 			rep.saveStepAttribute(id_transformation, id_step, "fileUpload", fileUpload); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "cmisDirectory", cmisDirectory); //$NON-NLS-1$
 
+			rep.saveStepAttribute(id_transformation, id_step, "cmisDocumentType", cmisDocumentType); //$NON-NLS-1$
+			rep.saveStepAttribute(id_transformation, id_step, "cmisProperties", cmisProperties); //$NON-NLS-1$
+			
 			rep.saveStepAttribute(id_transformation, id_step, "outputStatus", outputStatus); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "outputError", outputError); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "outputObjectId", outputObjectId); //$NON-NLS-1$
@@ -167,6 +181,9 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 			fileUpload = rep.getStepAttributeString(id_step, "fileUpload"); //$NON-NLS-1$
 			cmisDirectory = rep.getStepAttributeString(id_step, "cmisDirectory"); //$NON-NLS-1$
 
+			cmisDocumentType = rep.getStepAttributeString(id_step, "cmisDocumentType"); //$NON-NLS-1$
+			cmisProperties = rep.getStepAttributeString(id_step, "cmisProperties"); //$NON-NLS-1$
+			
 			outputStatus = rep.getStepAttributeString(id_step, "outputStatus"); //$NON-NLS-1$
 			outputError = rep.getStepAttributeString(id_step, "outputError"); //$NON-NLS-1$
 			outputObjectId = rep.getStepAttributeString(id_step, "outputObjectId"); //$NON-NLS-1$
@@ -258,6 +275,22 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 
 	public void setFileUpload(String fileUpload) {
 		this.fileUpload = fileUpload;
+	}
+
+	public String getCmisDocumentType() {
+		return cmisDocumentType;
+	}
+
+	public void setCmisDocumentType(String cmisDocumentType) {
+		this.cmisDocumentType = cmisDocumentType;
+	}
+
+	public String getCmisProperties() {
+		return cmisProperties;
+	}
+
+	public void setCmisProperties(String cmisProperties) {
+		this.cmisProperties = cmisProperties;
 	}
 
 }
