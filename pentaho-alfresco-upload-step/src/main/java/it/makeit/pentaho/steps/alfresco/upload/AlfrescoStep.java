@@ -22,6 +22,8 @@
 
 package it.makeit.pentaho.steps.alfresco.upload;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.pentaho.di.core.exception.KettleException;
@@ -60,76 +62,94 @@ public class AlfrescoStep extends BaseStep implements StepInterface {
     return true;
   }
 
- 
-  public boolean processRow( StepMetaInterface smi, StepDataInterface sdi ) throws KettleException {
+	public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException {
 
-	  AlfrescoUploadStepMeta meta = (AlfrescoUploadStepMeta) smi;
-	  AlfrescoUploadStepData data = (AlfrescoUploadStepData) sdi;
-	    
-	   Object[] r = getRow();
+		AlfrescoUploadStepMeta meta = (AlfrescoUploadStepMeta) smi;
+		AlfrescoUploadStepData data = (AlfrescoUploadStepData) sdi;
 
-    // se non ci sono più row interrompo l'esecuzione 
-    if ( r == null ) {
-      setOutputDone();
-      return false;
-    }
+		Object[] r = getRow();
 
-    
-    
-    if ( first ) {
-      first = false;
-      
-      // necessario per passare i dati da input ad output
-      data.outputRowMeta = (RowMetaInterface) getInputRowMeta().clone();
-      meta.getFields( data.outputRowMeta, getStepname(), null, null, this, null, null );
+		// se non ci sono più row interrompo l'esecuzione
+		if (r == null) {
+			setOutputDone();
+			return false;
+		}
 
-      
-      
-      data.outputErrorIndex = data.outputRowMeta.indexOfValue( meta.getOutputError() );
-      data.outputStatusIndex = data.outputRowMeta.indexOfValue( meta.getOutputStatus() );
-      data.outputObjectIdIndex = data.outputRowMeta.indexOfValue( meta.getOutputObjectId() );
-      
-      if ( data.outputErrorIndex < 0 || data.outputStatusIndex < 0 || data.outputObjectIdIndex < 0) {
-          log.logError( BaseMessages.getString( PKG, "AlfrescoUploadStep.Error.NoOutputFields" ) );
-          setErrors( 1L );
-          setOutputDone();
-          return false;
-       }
-    }
-    
-    
-    Object[] outputRow = RowDataUtil.resizeArray( r, data.outputRowMeta.size() );
-    
-    Random random = new Random();
-    boolean ok = random.nextBoolean();
-    
-    if(ok) {
-    	outputRow[data.outputErrorIndex] = null;
-        outputRow[data.outputStatusIndex] = "ok!";
-        outputRow[data.outputObjectIdIndex] = "3425254214!";
-    	
-    	
-    } else {
-    	outputRow[data.outputErrorIndex] = "Errore";
-        outputRow[data.outputStatusIndex] = null;
-        outputRow[data.outputObjectIdIndex] = null;
-	
-    }
-    
-    
-    
-    // put the row to the output row stream
-    putRow( data.outputRowMeta, outputRow );
+		if (first) {
+			first = false;
 
-    // log progress if it is time to to so
-    if ( checkFeedback( getLinesRead() ) ) {
-      logBasic( BaseMessages.getString( PKG, "AlfrescoUploadStep.Linenr", getLinesRead() ) ); // Some basic logging
-    }
+			// necessario per passare i dati da input ad output
+			data.outputRowMeta = (RowMetaInterface) getInputRowMeta().clone();
+			meta.getFields(data.outputRowMeta, getStepname(), null, null, this, null, null);
 
-    // ritorna true se devo continuare con la riga seguente
-    return true;
-  }
+			
+			
+			// gestione degli errori e campi invalidi
+			List<String> errors = new ArrayList<String>();
 
+			if (meta.getOutputStatus() == null) {
+				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoOutputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.outputStatus")));
+			}
+			data.outputStatusIndex = data.outputRowMeta.indexOfValue(meta.getOutputStatus());
+			if (data.outputStatusIndex == -1) {
+				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.OutputFieldInvalid", meta.getOutputStatus()));
+
+			}
+
+			if (meta.getOutputObjectId() == null) {
+				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoOutputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.outputObjectId")));
+			}
+			data.outputObjectIdIndex = data.outputRowMeta.indexOfValue(meta.getOutputObjectId());
+			if (data.outputObjectIdIndex == -1) {
+				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.OutputFieldInvalid", meta.getOutputObjectId()));
+
+			}
+
+			if (meta.getOutputError() == null) {
+				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoOutputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.outputError")));
+			}
+			data.outputErrorIndex = data.outputRowMeta.indexOfValue(meta.getOutputError());
+			if (data.outputErrorIndex == -1) {
+				errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.OutputFieldInvalid", meta.getOutputError()));
+
+			}
+
+			if (errors.size() > 0) {
+				errors.forEach(e -> log.logError(e));
+				setErrors(1L);
+				setOutputDone();
+				return false;
+			}
+		}
+
+		Object[] outputRow = RowDataUtil.resizeArray(r, data.outputRowMeta.size());
+
+		Random random = new Random();
+		boolean ok = random.nextBoolean();
+
+		if (ok) {
+			outputRow[data.outputErrorIndex] = null;
+			outputRow[data.outputStatusIndex] = "ok!";
+			outputRow[data.outputObjectIdIndex] = "3425254214!";
+
+		} else {
+			outputRow[data.outputErrorIndex] = "Errore";
+			outputRow[data.outputStatusIndex] = null;
+			outputRow[data.outputObjectIdIndex] = null;
+
+		}
+
+		// put the row to the output row stream
+		putRow(data.outputRowMeta, outputRow);
+
+		// log progress if it is time to to so
+		if (checkFeedback(getLinesRead())) {
+			logBasic(BaseMessages.getString(PKG, "AlfrescoUploadStep.Linenr", getLinesRead())); // Some basic logging
+		}
+
+		// ritorna true se devo continuare con la riga seguente
+		return true;
+	}
  
   public void dispose( StepMetaInterface smi, StepDataInterface sdi ) {
 

@@ -28,11 +28,9 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDialogInterface {
 
-	/**
-	 * The PKG member is used when looking up internationalized strings. The
-	 * properties file with localized keys is expected to reside in {the package of
-	 * the class specified}/messages/messages_{locale}.properties
-	 */
+	
+	
+	
 	private static Class<?> PKG = AlfrescoUploadStepMeta.class; // for i18n purposes
 
 	private AlfrescoUploadStepMeta meta;
@@ -44,6 +42,10 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 
 	private LabelText wFileUpload;
 	private LabelText wCmisDirectory;
+
+	private LabelText wOutputStatus;
+	private LabelText wOutputObjectId;
+	private LabelText wOutputError;
 
 	
 	public AlfrescoUploadStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
@@ -195,19 +197,41 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    FormLayout outputFormLayout = new FormLayout();
 	    outputFormLayout.marginWidth = Const.FORM_MARGIN;
 	    outputFormLayout.marginHeight = Const.FORM_MARGIN;
-	    alfrescoGroup.setLayout(outputFormLayout);
+	    outputGroup.setLayout(outputFormLayout);
 
+	    // RIGA STATUS
+	    wOutputStatus = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.outputStatus" ), null );
+	    props.setLook( wOutputStatus );
+	    wFileUpload.addModifyListener( lsMod );
+	    FormData fdOutputStatus = new FormData();
+	    fdOutputStatus.left = new FormAttachment( 0, 0 );
+	    fdOutputStatus.right = new FormAttachment( 100, 0 );
+	    fdOutputStatus.top = new FormAttachment( 0, margin );
+	    wOutputStatus.setLayoutData( fdOutputStatus );
+	    
+	    // RIGA OBJECT ID
+	    wOutputObjectId = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.outputObjectId" ), null );
+	    props.setLook( wOutputObjectId );
+	    wOutputObjectId.addModifyListener( lsMod );
+	    FormData fdOutputObjectId = new FormData();
+	    fdOutputObjectId.left = new FormAttachment( 0, 0 );
+	    fdOutputObjectId.right = new FormAttachment( 100, 0 );
+	    fdOutputObjectId.top = new FormAttachment( wOutputStatus, margin );
+	    wOutputObjectId.setLayoutData( fdOutputObjectId );
+	    
+	   
+	    // RIGA ERROR
+	    wOutputError = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.outputError" ), null );
+		props.setLook( wOutputError );
+		wOutputError.addModifyListener( lsMod );
+	    FormData fdOutputError = new FormData();
+	    fdOutputError.left = new FormAttachment( 0, 0 );
+	    fdOutputError.right = new FormAttachment( 100, 0 );
+	    fdOutputError.top = new FormAttachment( wOutputObjectId, margin );
+	    wOutputError.setLayoutData( fdOutputError );
 	    
 	    
 	    
-	    
-	    
-	    
-	    
-	    
-	    
-	    
-
 	    // OK and cancel buttons
 	    wOK = new Button( shell, SWT.PUSH );
 	    wOK.setText( BaseMessages.getString( PKG, "System.Button.OK" ) );
@@ -253,7 +277,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    // gestione del resize e riapertura
 	    setSize();
 
-	    wStepname.selectAll();
+	    populateDialog();
 	    
 	    // restore the changed flag to original value, as the modify listeners fire during dialog population  
 	    meta.setChanged( changed );
@@ -281,9 +305,9 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 		dispose();
 	}
 
-	/**
-	 * Called when the user confirms the dialog
-	 */
+
+
+
 	private void ok() {
 		stepname = wStepname.getText();
 
@@ -292,8 +316,35 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 		meta.setCmisPassword(wCmisPassword.getText());
 
 		meta.setFileUpload(wFileUpload.getText());
-		meta.setCmisDirectory(wCmisPassword.getText());
+		meta.setCmisDirectory(wCmisDirectory.getText());
+		
+		meta.setOutputStatus(wOutputStatus.getText());
+		meta.setOutputObjectId(wOutputObjectId.getText());
+		meta.setOutputError(wOutputError.getText());
 		
 		dispose();
+	}
+	
+	
+	
+	
+	private void populateDialog() {
+		
+		wStepname.selectAll();
+		
+		if( meta.getCmisUrl() != null) 	wCmisUrl.setText( meta.getCmisUrl() );
+		
+		if( meta.getCmisUser() != null) 	wCmisUser.setText( meta.getCmisUser() );
+		if( meta.getCmisPassword() != null) 	wCmisPassword.setText( meta.getCmisPassword() );
+		
+		
+		if( meta.getFileUpload() != null) 	wFileUpload.setText( meta.getFileUpload() );
+		if( meta.getCmisDirectory() != null) 	wCmisDirectory.setText( meta.getCmisDirectory());
+		
+		if( meta.getOutputStatus() != null) 	wOutputStatus.setText( meta.getOutputStatus() );
+		if( meta.getOutputObjectId() != null) 	wOutputObjectId.setText( meta.getOutputObjectId() );
+		if( meta.getOutputError() != null) 	wOutputError.setText( meta.getOutputError() );
+		
+		
 	}
 }
