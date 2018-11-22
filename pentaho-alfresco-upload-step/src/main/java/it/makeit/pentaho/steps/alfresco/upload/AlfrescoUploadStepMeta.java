@@ -34,7 +34,7 @@ import org.w3c.dom.Node;
 		name = "AlfrescoUploadStep.Name", 
 		description = "AlfrescoUploadStep.TooltipDesc", 
 		image = "it/makeit/pentaho/steps/alfresco/upload/resources/alfresco_upload.svg", 
-		categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Transform", 
+		categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Output", 
 		i18nPackageName = "it.makeit.pentaho.steps.alfresco.upload", documentationUrl = "AlfrescoUploadStep.DocumentationURL", 
 		casesUrl = "AlfrescoUploadStep.CasesURL", forumUrl = "AlfrescoUploadStep.ForumURL")
 @InjectionSupported(localizationPrefix = "AlfrescoUploadStepMeta.Injection.")
