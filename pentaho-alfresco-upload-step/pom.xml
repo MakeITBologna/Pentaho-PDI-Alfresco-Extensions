@@ -5,7 +5,7 @@
 
 	<groupId>it.makeit.pentaho</groupId>
 	<artifactId>pentaho-alfresco-upload-step</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.7.0</version>
 
 
 
