@@ -1,4 +1,4 @@
-package it.makeit.pentaho.steps.alfresco.upload.helper;
+package it.makeit.pentaho.steps.alfresco.helper;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExistsException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 
-public class AlfrescoUploadStepHelper {
+public class AlfrescoStepHelper {
 
 	
 	public static Session createSession(String url, String user, String password) {

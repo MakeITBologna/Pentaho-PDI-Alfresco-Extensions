@@ -50,6 +50,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 
 	private LabelCombo wFileUpload;
 	private LabelCombo wCmisDirectory;
+	private LabelCombo wCmisDirectoryType;
 
 	private LabelCombo wCmisDoctype;
 	private LabelCombo wCmisProperties;
@@ -58,6 +59,10 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	private LabelText wOutputObjectId;
 	private LabelText wOutputError;
 
+	private String[] cmisDirectoryTypes = new String[] {
+    		BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDirectoryTypePath" ),  
+    		BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDirectoryTypeObjectId" ) 
+    	};
 	
 	public AlfrescoUploadStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
 		super(parent, (BaseStepMeta) in, transMeta, sname);
@@ -194,6 +199,20 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    fdCmisDirectory.top = new FormAttachment( wFileUpload, margin );
 	    wCmisDirectory.setLayoutData( fdCmisDirectory );
 	    
+	    // RIGA CMIS DIRECTORY Type
+		wCmisDirectoryType = new LabelCombo( alfrescoGroup, SWT.READ_ONLY, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDirectoryType" ), null );
+	    wCmisDirectoryType.setItems(cmisDirectoryTypes);
+	    wCmisDirectoryType.setText(cmisDirectoryTypes[0]);
+	    props.setLook( wCmisDirectoryType );
+	    wCmisDirectoryType.addModifyListener( lsMod );
+		FormData fdCmisDirectoryIsObjectID = new FormData();
+	    fdCmisDirectoryIsObjectID.left = new FormAttachment( 0, 0 );
+	    fdCmisDirectoryIsObjectID.right = new FormAttachment( 100, 0 );
+	    fdCmisDirectoryIsObjectID.top = new FormAttachment( wCmisDirectory, margin );
+	    wCmisDirectoryType.setLayoutData( fdCmisDirectoryIsObjectID );
+	    
+	    
+	    
 	    // RIGA CMIS DOC TYPE
 	    wCmisDoctype = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDocType" ), null );
 	    setComboFieldField(wCmisDoctype);
@@ -202,7 +221,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    FormData fdCmisDocType = new FormData();
 	    fdCmisDocType.left = new FormAttachment( 0, 0 );
 	    fdCmisDocType.right = new FormAttachment( 100, 0 );
-	    fdCmisDocType.top = new FormAttachment( wCmisDirectory, margin );
+	    fdCmisDocType.top = new FormAttachment( wCmisDirectoryType, margin );
 	    wCmisDoctype.setLayoutData( fdCmisDocType );
 	    
 	    // RIGA CMIS DIRECTORY
@@ -263,8 +282,6 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    fdOutputError.top = new FormAttachment( wOutputObjectId, margin );
 	    wOutputError.setLayoutData( fdOutputError );
 	    
-	    
-	    
 	    // OK and cancel buttons
 	    wOK = new Button( shell, SWT.PUSH );
 	    wOK.setText( BaseMessages.getString( PKG, "System.Button.OK" ) );
@@ -299,13 +316,14 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 
 	    wFileUpload.addSelectionListener( lsDef );
 	    wCmisDirectory.addSelectionListener( lsDef );
+	    wCmisDirectoryType.addSelectionListener( lsDef );
 
 	    // X o ALT-F4
 	    shell.addShellListener( new ShellAdapter() {
 	      public void shellClosed( ShellEvent e ) {
 	        cancel();
 	      }
-	    } );
+	    });
 
 	    // gestione del resize e riapertura
 	    setSize();
@@ -351,6 +369,8 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 		meta.setFileUpload(!Strings.isNullOrEmpty(wFileUpload.getText()) ? wFileUpload.getText() : null);
 		meta.setCmisDirectory(!Strings.isNullOrEmpty(wCmisDirectory.getText()) ? wCmisDirectory.getText() : null);
 		
+		meta.setCmisDirectoryType(!Strings.isNullOrEmpty(wCmisDirectoryType.getText()) ? wCmisDirectoryType.getText().equals(cmisDirectoryTypes[0]) ? 0 : 1  : 0 );
+		
 		meta.setCmisDocumentType(!Strings.isNullOrEmpty(wCmisDoctype.getText()) ? wCmisDoctype.getText() : null);
 		meta.setCmisProperties(!Strings.isNullOrEmpty(wCmisProperties.getText()) ? wCmisProperties.getText() : null);
 		
@@ -376,6 +396,8 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 		
 		if( meta.getFileUpload() != null && Arrays.asList(wFileUpload.getItems()).contains( meta.getFileUpload()) ) 	wFileUpload.setText( meta.getFileUpload() );
 		if( meta.getCmisDirectory() != null && Arrays.asList(wCmisDirectory.getItems()).contains(meta.getCmisDirectory()) ) 	wCmisDirectory.setText( meta.getCmisDirectory());
+		if( meta.getCmisDirectoryType() != null ) 	wCmisDirectoryType.setText( cmisDirectoryTypes[meta.getCmisDirectoryType()]);
+		
 		
 		if( meta.getCmisDocumentType() != null && Arrays.asList(wCmisDoctype.getItems()).contains( meta.getCmisDocumentType()) ) 	wCmisDoctype.setText( meta.getCmisDocumentType() );
 		if( meta.getCmisProperties() != null && Arrays.asList(wCmisProperties.getItems()).contains(meta.getCmisProperties()) ) 	wCmisProperties.setText( meta.getCmisProperties());
@@ -383,6 +405,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 		if( meta.getOutputStatus() != null) 	wOutputStatus.setText( meta.getOutputStatus() );
 		if( meta.getOutputObjectId() != null) 	wOutputObjectId.setText( meta.getOutputObjectId() );
 		if( meta.getOutputError() != null) 	wOutputError.setText( meta.getOutputError() );
+		
 		
 		
 	}

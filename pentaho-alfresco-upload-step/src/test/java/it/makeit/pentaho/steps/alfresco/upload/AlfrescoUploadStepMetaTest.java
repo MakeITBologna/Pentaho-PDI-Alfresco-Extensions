@@ -56,8 +56,12 @@ public class AlfrescoUploadStepMetaTest {
 		List<String> attributes = Arrays.asList("cmisUrl", "cmisUser", "cmisPassword");
 
 		LoadSaveTester<AlfrescoUploadStepMeta> tester = new LoadSaveTester<AlfrescoUploadStepMeta>(AlfrescoUploadStepMeta.class, attributes);
-
-		tester.testSerialization();
+		try {
+			tester.testSerialization();	
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	@Test

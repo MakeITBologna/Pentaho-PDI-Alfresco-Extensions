@@ -1,4 +1,4 @@
-package it.makeit.pentaho.steps.alfresco.upload.helper;
+package it.makeit.pentaho.steps.alfresco.helper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 
-public class AlfrescoUploadStepJsonHelper {
+public class AlfrescoStepJsonHelper {
 	private static Gson gson = new GsonBuilder().create();
 
 	public static Map<String, Object> jsonProperties(String json) {

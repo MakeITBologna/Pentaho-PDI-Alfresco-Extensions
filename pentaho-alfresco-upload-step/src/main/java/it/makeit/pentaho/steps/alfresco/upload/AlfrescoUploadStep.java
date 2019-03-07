@@ -47,8 +47,8 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 
 import com.google.common.base.Strings;
 
-import it.makeit.pentaho.steps.alfresco.upload.helper.AlfrescoUploadStepHelper;
-import it.makeit.pentaho.steps.alfresco.upload.helper.AlfrescoUploadStepJsonHelper;
+import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepHelper;
+import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepJsonHelper;
 
 public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 
@@ -147,7 +147,7 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			String sessionKey = cmisUrl + "_" + cmisUser;
 			Session session = data.sessionsPerUser.get(sessionKey);
 			if (!data.sessionsPerUser.containsKey(sessionKey)) {
-				session = AlfrescoUploadStepHelper.createSession(cmisUrl, cmisUser, cmisPassword);
+				session = AlfrescoStepHelper.createSession(cmisUrl, cmisUser, cmisPassword);
 				data.sessionsPerUser.put(sessionKey, session);
 			}
 
@@ -167,9 +167,17 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			if(Strings.isNullOrEmpty(cmisDirectory)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisDirectory")));
 			
 			
-			Map<String, Object> propertiesMap = AlfrescoUploadStepJsonHelper.jsonProperties(cmisProperties);
+			Map<String, Object> propertiesMap = AlfrescoStepJsonHelper.jsonProperties(cmisProperties);
 			
-			Folder folder = AlfrescoUploadStepHelper.getOrCreateFolderByPath(session, cmisDirectory);
+			
+			Folder folder; 
+			if(AlfrescoUploadStepMeta.PATH.equals( meta.getCmisDirectoryType())) {
+				folder = AlfrescoStepHelper.getOrCreateFolderByPath(session, cmisDirectory);	
+			} else {
+				folder = (Folder) session.getObject(session.createObjectId(cmisDirectory));
+			}
+			
+			
 
 			File file = new File(fileUpload);
 			if (!file.exists()) {
@@ -179,16 +187,22 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			
 			Document document = null;
 			try {
-				document = AlfrescoUploadStepHelper.createDocument(session, folder.getId(), file.getName(), -1, "application/octet-stream", inputStream, new HashMap<String, Object>(), new ArrayList<>(), cmisDocType);
+				
+				String filename = file.getName();
+				if(propertiesMap.containsKey("cmis:name")) {
+					filename = (String) propertiesMap.get("cmis:name");
+				}
+				
+				document = AlfrescoStepHelper.createDocument(session, folder.getId(), filename, -1, "application/octet-stream", inputStream, new HashMap<String, Object>(), new ArrayList<>(), cmisDocType);
 			
 				if(!propertiesMap.isEmpty()) { // per gestione aspetti
-					AlfrescoUploadStepHelper.updateDocumentProperties(session, document.getId(), propertiesMap);
+					AlfrescoStepHelper.updateDocumentProperties(session, document.getId(), propertiesMap);
 				}
 			
 			} catch(Exception e) {
 				// su indicazione di Riccardo Arzenton
 				if(document != null) {
-					AlfrescoUploadStepHelper.deleteDocument(session, document.getId(),true);
+					AlfrescoStepHelper.deleteDocument(session, document.getId(),true);
 				}
 				throw e;
 			}
