@@ -1,4 +1,4 @@
-package it.makeit.pentaho.steps.alfresco.download;
+package it.makeit.pentaho.steps.alfresco.detail;
 
 import java.util.List;
 
@@ -13,6 +13,8 @@ import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.injection.Injection;
 import org.pentaho.di.core.injection.InjectionSupported;
 import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
@@ -28,17 +30,17 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
-@Step(id = "AlfrescoDownloadStep", 
-		name = "AlfrescoDownloadStep.Name", 
-		description = "AlfrescoDownloadStep.TooltipDesc", 
-		image = "it/makeit/pentaho/steps/alfresco/download/resources/alfresco_download.svg", 
+@Step(id = "AlfrescoDetailStep", 
+		name = "AlfrescoDetailStep.Name", 
+		description = "AlfrescoDetailStep.TooltipDesc", 
+		image = "it/makeit/pentaho/steps/alfresco/detail/resources/alfresco_download.svg", 
 		categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Output", 
-		i18nPackageName = "it.makeit.pentaho.steps.alfresco.Download", documentationUrl = "AlfrescoDownloadStep.DocumentationURL", 
-		casesUrl = "AlfrescoDownloadStep.CasesURL", forumUrl = "AlfrescoDownloadStep.ForumURL")
-@InjectionSupported(localizationPrefix = "AlfrescoDownloadStepMeta.Injection.")
-public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaInterface {
+		i18nPackageName = "it.makeit.pentaho.steps.alfresco.Detail", documentationUrl = "AlfrescoDetailStep.DocumentationURL", 
+		casesUrl = "AlfrescoDetailStep.CasesURL", forumUrl = "AlfrescoDetailStep.ForumURL")
+@InjectionSupported(localizationPrefix = "AlfrescoDetailStepMeta.Injection.")
+public class AlfrescoDetailStepMeta extends BaseStepMeta implements StepMetaInterface {
 
-	private static final Class<?> PKG = AlfrescoDownloadStepMeta.class; // for i18n purposes
+	private static final Class<?> PKG = AlfrescoDetailStepMeta.class; // for i18n purposes
 
 	
 	public static Integer PATH = 0, OBJECT_ID = 1;
@@ -50,8 +52,8 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 	@Injection(name = "CMIS_PASSOWRD")
 	private String cmisPassword;
 
-	@Injection(name = "FILE_Download")
-	private String fileDownload;
+	@Injection(name = "DETAIL")
+	private String detail;
 	@Injection(name = "CMIS_FILE")
 	private String cmisFile;
 	@Injection(name = "CMIS_FILE_TYPE")
@@ -59,7 +61,7 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 
 	
 
-	public AlfrescoDownloadStepMeta() {
+	public AlfrescoDetailStepMeta() {
 		super();
 	}
 
@@ -70,18 +72,23 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 
 	@Override
 	public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta, Trans trans) {
-		return new AlfrescoDownloadStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
+		return new AlfrescoDetailStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
 	}
 
 	@Override
 	public StepDataInterface getStepData() {
-		return new AlfrescoDownloadStepData();
+		return new AlfrescoDetailStepData();
 	}
 
 	@Override
 	public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore metaStore) throws KettleStepException {
 		
-		
+
+		ValueMetaInterface v1 = new ValueMetaString( detail );
+	    v1.setTrimType( ValueMetaInterface.TRIM_TYPE_BOTH );
+	    v1.setOrigin( name );
+	    inputRowMeta.addValueMeta( v1 );
+	   
 	    
 	}
 	
@@ -94,7 +101,7 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 		xml.append(XMLHandler.addTagValue("cmisUser", cmisUser));
 		xml.append(XMLHandler.addTagValue("cmisPassword", cmisPassword));
 
-		xml.append(XMLHandler.addTagValue("fileDownload", fileDownload));
+		xml.append(XMLHandler.addTagValue("detail", detail));
 		xml.append(XMLHandler.addTagValue("cmisFile", cmisFile));
 		if(cmisFileType != null) {
 			xml.append(XMLHandler.addTagValue("cmisFileType", cmisFileType));
@@ -111,7 +118,7 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 			setCmisUser(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisUser")));
 			setCmisPassword(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisPassword")));
 
-			setFileDownload(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "fileDownload")));
+			setDetail(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "detail")));
 			setCmisFile(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisFile")));
 			
 			String fileType = XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisFileType"));
@@ -121,7 +128,7 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 			
 			
 		} catch (Exception e) {
-			throw new KettleXMLException("Alfresco Download Step plugin unable to read step info from XML node", e);
+			throw new KettleXMLException("Alfresco Detail Step plugin unable to read step info from XML node", e);
 		}
 	}
 
@@ -132,7 +139,7 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 			rep.saveStepAttribute(id_transformation, id_step, "cmisUser", cmisUser); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "cmisPassword", cmisPassword); //$NON-NLS-1$
 
-			rep.saveStepAttribute(id_transformation, id_step, "fileDownload", fileDownload); //$NON-NLS-1$
+			rep.saveStepAttribute(id_transformation, id_step, "detail", detail); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "cmisFile", cmisFile); //$NON-NLS-1$
 			if(cmisFileType != null) {
 				rep.saveStepAttribute(id_transformation, id_step, "cmisFileType", cmisFileType); //$NON-NLS-1$
@@ -151,7 +158,7 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 			cmisUser = rep.getStepAttributeString(id_step, "cmisUser"); //$NON-NLS-1$
 			cmisPassword = rep.getStepAttributeString(id_step, "cmisPassword"); //$NON-NLS-1$
 
-			fileDownload = rep.getStepAttributeString(id_step, "fileDownload"); //$NON-NLS-1$
+			detail = rep.getStepAttributeString(id_step, "detail"); //$NON-NLS-1$
 			cmisFile = rep.getStepAttributeString(id_step, "cmisFile"); //$NON-NLS-1$
 			
 			String cmisFileType = rep.getStepAttributeString(id_step, "cmisFileType");
@@ -171,10 +178,10 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 	public void check(List<CheckResultInterface> remarks, TransMeta transMeta, StepMeta stepMeta, RowMetaInterface prev, String[] input, String[] output, RowMetaInterface info, VariableSpace space, Repository repository, IMetaStore metaStore) {
 		
 		if (input != null && input.length > 0) {
-			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "AlfrescoDownloadStep.CheckResult.ReceivingRows.OK"), stepMeta);
+			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "AlfrescoDetailStep.CheckResult.ReceivingRows.OK"), stepMeta);
 			remarks.add(cr);
 		} else {
-			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "AlfrescoDownloadStep.CheckResult.ReceivingRows.ERROR"), stepMeta);
+			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "AlfrescoDetailStep.CheckResult.ReceivingRows.ERROR"), stepMeta);
 			remarks.add(cr);
 		}
 		
@@ -212,12 +219,12 @@ public class AlfrescoDownloadStepMeta extends BaseStepMeta implements StepMetaIn
 	}
 
 
-	public String getFileDownload() {
-		return fileDownload;
+	public String getDetail() {
+		return detail;
 	}
 
-	public void setFileDownload(String fileDownload) {
-		this.fileDownload = fileDownload;
+	public void setDetail(String detail) {
+		this.detail = detail;
 	}
 
 	public String getCmisFile() {

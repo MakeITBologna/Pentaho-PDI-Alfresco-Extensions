@@ -59,6 +59,11 @@ public class AlfrescoStepJsonHelper {
 		return properties;
 	}
 
+	public static String dateToString(Date date) {
+		return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(date);
+	}
+	
+	
 	private enum JsonTypes {
 		S, L, D, I, F, B, DT, TS;
 
