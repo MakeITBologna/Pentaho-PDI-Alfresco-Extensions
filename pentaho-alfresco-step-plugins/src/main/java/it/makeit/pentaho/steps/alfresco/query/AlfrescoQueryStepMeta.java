@@ -33,6 +33,8 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
+import com.google.common.base.Strings;
+
 import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepHelper;
 
 
@@ -81,6 +83,7 @@ public class AlfrescoQueryStepMeta extends BaseStepMeta implements StepMetaInter
 	public void getFields(RowMetaInterface inputRowMeta, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space, Repository repository, IMetaStore metaStore) throws KettleStepException {
 		
 		
+		
 		String sql = space.environmentSubstitute(getCmisQuery());
 
 		String url = space.environmentSubstitute(getCmisUrl());
@@ -88,6 +91,15 @@ public class AlfrescoQueryStepMeta extends BaseStepMeta implements StepMetaInter
 		String user = space.environmentSubstitute(getCmisUser());
 		String password = space.environmentSubstitute(getCmisPassword());
 
+		if(Strings.isNullOrEmpty(sql) || 
+				Strings.isNullOrEmpty(url) || 
+				Strings.isNullOrEmpty(user) || 
+				Strings.isNullOrEmpty(password)) {
+		
+			return;
+		}
+		
+		
 		Session session = AlfrescoStepHelper.createSession(url, user, password);
 		session.getDefaultContext().setCacheEnabled(false);
 		session.getDefaultContext().setMaxItemsPerPage(Integer.MAX_VALUE);
