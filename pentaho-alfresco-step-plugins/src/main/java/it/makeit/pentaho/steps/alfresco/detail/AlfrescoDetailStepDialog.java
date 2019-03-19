@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.Const;
-import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.TransMeta;
@@ -70,6 +70,15 @@ public class AlfrescoDetailStepDialog extends BaseStepDialog implements StepDial
 	    
 	    setShellImage( shell, meta );
 
+	    RowMetaInterface inputFields = null;
+	    try {
+			inputFields = transMeta.getPrevStepFields( stepname );
+		} catch (KettleStepException e1) {
+			new ErrorDialog( shell,
+			        BaseMessages.getString( PKG, "ValidatorDialog.Exception.CantGetFieldsFromPreviousSteps.Title" ),
+			        BaseMessages.getString( PKG, "ValidatorDialog.Exception.CantGetFieldsFromPreviousSteps.Message" ), e1 );
+		}
+	    
 	    // valore changed se l'utente modifica la finestra
 	    changed = meta.hasChanged();
 
@@ -135,7 +144,7 @@ public class AlfrescoDetailStepDialog extends BaseStepDialog implements StepDial
 	    
 	    // RIGA CMIS URL
 	    wCmisUrl = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDetailStep.ui.cmisUrl" ), null );
-	    setComboFieldField(wCmisUrl);
+	    setComboFieldField(wCmisUrl, inputFields);
 	    props.setLook( wCmisUrl );
 	    wCmisUrl.addModifyListener( lsMod );
 	    FormData fdCmisUrl = new FormData();
@@ -146,7 +155,7 @@ public class AlfrescoDetailStepDialog extends BaseStepDialog implements StepDial
 	    
 	    // RIGA CMIS USER
 	    wCmisUser = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDetailStep.ui.cmisUser" ), null );
-	    setComboFieldField(wCmisUser);
+	    setComboFieldField(wCmisUser, inputFields);
 	    props.setLook( wCmisUser );
 	    wCmisUser.addModifyListener( lsMod );
 	    FormData fdCmisUser = new FormData();
@@ -157,7 +166,7 @@ public class AlfrescoDetailStepDialog extends BaseStepDialog implements StepDial
 	    
 	    // RIGA CMIS PASSWORD
 	    wCmisPassword = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDetailStep.ui.cmisPassword" ), null );
-	    setComboFieldField(wCmisPassword);
+	    setComboFieldField(wCmisPassword, inputFields);
 		props.setLook( wCmisPassword );
 	    wCmisPassword.addModifyListener( lsMod );
 	    FormData fdCmisPassword = new FormData();
@@ -168,7 +177,7 @@ public class AlfrescoDetailStepDialog extends BaseStepDialog implements StepDial
 	    
 	    // RIGA Detail
 	    wDetail = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDetailStep.ui.detail" ), null );
-	    setComboFieldField(wDetail);
+	    setComboFieldField(wDetail, inputFields);
 	    props.setLook( wDetail );
 	    wDetail.addModifyListener( lsMod );
 	    FormData fdDetail = new FormData();
@@ -179,7 +188,7 @@ public class AlfrescoDetailStepDialog extends BaseStepDialog implements StepDial
 	    
 	    // RIGA CMIS DIRECTORY
 	    wCmisFile = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDetailStep.ui.cmisFile" ), null );
-	    setComboFieldField(wCmisFile);
+	    setComboFieldField(wCmisFile, inputFields);
 	    props.setLook( wCmisFile );
 	    wCmisFile.addModifyListener( lsMod );
 	    FormData fdCmisFile = new FormData();
@@ -318,21 +327,13 @@ public class AlfrescoDetailStepDialog extends BaseStepDialog implements StepDial
 		
 	}
 	
-	private void setComboFieldField(LabelCombo labelCombo) {
-	    try {
+	private void setComboFieldField(LabelCombo labelCombo, RowMetaInterface inputFields) {
 	      labelCombo.removeAll();
 
-	      RowMetaInterface r = transMeta.getPrevStepFields( stepname );
-	      if ( r != null ) {
-	    	  labelCombo.setItems( r.getFieldNames() );
+	      if ( inputFields != null ) {
+	    	  labelCombo.setItems( inputFields.getFieldNames() );
 	      }
-	      
-	    } catch ( KettleException ke ) {
-	    	new ErrorDialog( shell, 
-	    			BaseMessages.getString( PKG, "AlfrescoDetailStep.ui.FailedToGetFields.DialogTitle" ),  
-	    			BaseMessages.getString( PKG, "AlfrescoDetailStep.ui.FailedToGetFields.DialogMessage" ), 
-	    			ke );
-	    }
+	    
 	  }
 
 	

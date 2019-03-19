@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.enums.IncludeRelationships;
@@ -161,11 +161,11 @@ public class AlfrescoDetailStep extends BaseStep implements StepInterface {
 			
 			
 			
-			Document document; 
+			CmisObject documentOrItem; 
 			if(AlfrescoDownloadStepMeta.PATH.equals( meta.getCmisFileType())) {
-				document = (Document) session.getObjectByPath(cmisFile);	
+				documentOrItem = session.getObjectByPath(cmisFile);	
 			} else {
-				document = (Document) session.getObject(session.createObjectId(cmisFile));
+				documentOrItem = session.getObject(session.createObjectId(cmisFile));
 			}
 			
 			
@@ -174,7 +174,7 @@ public class AlfrescoDetailStep extends BaseStep implements StepInterface {
 			JsonArray properties = new JsonArray();
 			obj.add("properties", properties);
 			
-			for (PropertyData<?> property : document.getProperties()) {
+			for (PropertyData<?> property : documentOrItem.getProperties()) {
 				
 				JsonObject prop = new JsonObject();
 				
@@ -202,7 +202,7 @@ public class AlfrescoDetailStep extends BaseStep implements StepInterface {
 			
 			JsonArray relationships = new JsonArray();
 			obj.add("relationships", relationships);
-			document.getRelationships().forEach(relationship ->{
+			documentOrItem.getRelationships().forEach(relationship ->{
 				JsonObject rel = new JsonObject();
 				if(relationship.getSourceId() != null) {
 					rel.addProperty("source", relationship.getSourceId().getId());	
