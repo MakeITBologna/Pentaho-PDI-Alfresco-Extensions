@@ -6,7 +6,15 @@ import java.util.List;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.commons.data.PropertyBoolean;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
+import org.apache.chemistry.opencmis.commons.data.PropertyDateTime;
+import org.apache.chemistry.opencmis.commons.data.PropertyDecimal;
+import org.apache.chemistry.opencmis.commons.data.PropertyHtml;
+import org.apache.chemistry.opencmis.commons.data.PropertyId;
+import org.apache.chemistry.opencmis.commons.data.PropertyInteger;
+import org.apache.chemistry.opencmis.commons.data.PropertyString;
+import org.apache.chemistry.opencmis.commons.data.PropertyUri;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.annotations.Step;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -18,6 +26,10 @@ import org.pentaho.di.core.injection.Injection;
 import org.pentaho.di.core.injection.InjectionSupported;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaBigNumber;
+import org.pentaho.di.core.row.value.ValueMetaBoolean;
+import org.pentaho.di.core.row.value.ValueMetaDate;
+import org.pentaho.di.core.row.value.ValueMetaInteger;
 import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.xml.XMLHandler;
@@ -110,8 +122,28 @@ public class AlfrescoQueryStepMeta extends BaseStepMeta implements StepMetaInter
 		if(it.hasNext()) {
 			QueryResult firstRow = it.next();
 			for (PropertyData<?> property : firstRow.getProperties()) {
+
 				String propertyName = property.getQueryName().replaceAll(":", "_");
-				ValueMetaInterface v = new ValueMetaString(propertyName);
+
+				ValueMetaInterface v = null;
+				Object value = property.getFirstValue();
+				if (value == null) {
+					v = new ValueMetaString(propertyName);
+				} else if (property instanceof PropertyString) {
+					v = new ValueMetaString(propertyName);
+				} else if (property instanceof PropertyInteger) {
+					v = new ValueMetaInteger(propertyName);
+				} else if (property instanceof PropertyDecimal) {
+					v = new ValueMetaBigNumber(propertyName);
+				} else if (property instanceof PropertyBoolean) {
+					v = new ValueMetaBoolean(propertyName);
+				} else if (property instanceof PropertyDateTime) {
+					v = new ValueMetaDate(propertyName);
+				} else if (property instanceof PropertyId || property instanceof PropertyUri || property instanceof PropertyHtml) {
+					v = new ValueMetaString(propertyName);
+				} else {
+					throw new IllegalArgumentException("Unsupported type: " + value.getClass());
+				}
 				v.setTrimType(ValueMetaInterface.TRIM_TYPE_BOTH);
 				v.setOrigin(name);
 				inputRowMeta.addValueMeta(v);

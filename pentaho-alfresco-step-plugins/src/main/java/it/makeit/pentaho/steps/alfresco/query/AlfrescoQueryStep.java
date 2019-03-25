@@ -22,15 +22,28 @@
 
 package it.makeit.pentaho.steps.alfresco.query;
 
+import java.math.BigInteger;
 import java.util.GregorianCalendar;
 
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.commons.data.PropertyBoolean;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
+import org.apache.chemistry.opencmis.commons.data.PropertyDateTime;
+import org.apache.chemistry.opencmis.commons.data.PropertyDecimal;
+import org.apache.chemistry.opencmis.commons.data.PropertyHtml;
+import org.apache.chemistry.opencmis.commons.data.PropertyId;
+import org.apache.chemistry.opencmis.commons.data.PropertyInteger;
+import org.apache.chemistry.opencmis.commons.data.PropertyString;
+import org.apache.chemistry.opencmis.commons.data.PropertyUri;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.row.value.ValueMetaBigNumber;
+import org.pentaho.di.core.row.value.ValueMetaBoolean;
+import org.pentaho.di.core.row.value.ValueMetaDate;
+import org.pentaho.di.core.row.value.ValueMetaInteger;
 import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
@@ -103,8 +116,29 @@ public class AlfrescoQueryStep extends BaseStep implements StepInterface {
 			data.rowMeta = new RowMeta();
 
 			for (PropertyData<?> property : data.currentRow.getProperties()) {
+				
+				
+				ValueMetaInterface v = null;
+				Object value = property.getFirstValue();
 				String propertyName = property.getQueryName().replaceAll(":", "_");
-				ValueMetaInterface v = new ValueMetaString(propertyName);
+				if (value == null) {
+					v = new ValueMetaString(propertyName);
+				} else if (property instanceof PropertyString) {
+					v = new ValueMetaString(propertyName);
+				} else if (property instanceof PropertyInteger) {
+					v = new ValueMetaInteger(propertyName);
+				} else if (property instanceof PropertyDecimal) {
+					v = new ValueMetaBigNumber(propertyName);
+				} else if (property instanceof PropertyBoolean) {
+					v = new ValueMetaBoolean(propertyName);
+				} else if (property instanceof PropertyDateTime) {
+					v = new ValueMetaDate(propertyName);
+				} else if (property instanceof PropertyId || property instanceof PropertyUri || property instanceof PropertyHtml) {
+					v = new ValueMetaString(propertyName);
+				} else {
+					throw new IllegalArgumentException("Unsupported type: " + value.getClass());
+				}
+				
 				v.setTrimType(ValueMetaInterface.TRIM_TYPE_BOTH);
 				v.setOrigin(getStepname());
 				data.rowMeta.addValueMeta(v);
@@ -148,6 +182,9 @@ public class AlfrescoQueryStep extends BaseStep implements StepInterface {
 	private Object convert(Object firstValue) {
 		if(firstValue instanceof GregorianCalendar) {
 			return ((GregorianCalendar) firstValue).getTime();
+		}
+		if(firstValue instanceof BigInteger) {
+			return ((BigInteger) firstValue).longValue();
 		}
 		return firstValue;
 	}
