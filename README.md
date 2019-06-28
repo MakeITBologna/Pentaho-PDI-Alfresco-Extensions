@@ -82,7 +82,7 @@ Example:
 
 ## HOW TO INSTALL
 
-1) Downloaded last version of extensions from releases page:https://github.com/MakeITBologna/Pentaho-PDI-Alfresco-Extensions/releases
+1) Download last version of extensions from releases page: https://github.com/MakeITBologna/Pentaho-PDI-Alfresco-Extensions/releases
 2) Unzip the downloaded file in plugins directory of Pentaho Data Integration
 
 ## COMPATIBILITY
