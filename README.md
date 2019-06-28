@@ -4,21 +4,43 @@ Pentaho PDI Alfresco Extensions
 Pentaho-PDI-Alfresco-Extensions introduces Alfresco/CMIS file upload feature in PDI.
 
 The extension permits to: 
+* query Alfresco using a CMIS query
+* download document from Alfresco
 * upload documents to Alfresco, specifying  DocumentType, Metadata, Destination Folder and to get output in a human-readable format. 
 
+## QUERY
+### Input
+* URL Alfresco
+* Username Alfresco
+* Password Alfresco
+* CMIS query
+### Output
+CMIS query results as rows
 
-## UPLOADER
+## DOWNLOAD
 
 ### Input
 * URL Alfresco
 * Username Alfresco
 * Password Alfresco
-* Path of the file
+* File to dowload: destination path of the downloaded file
+* CMIS File to download
+* CMIS File path: file identification mode: path or objectid
+### Output
+No output
+
+## UPLOAD
+
+### Input
+* URL Alfresco
+* Username Alfresco
+* Password Alfresco
+* Path of the file to upload
 * Path of Alfresco directory
 * DocumentType in Alfresco
-* JSON metadata
+* CMIS properties expressed in JSON format
 
-#### JSON Metadata
+#### CMIS PROPERTIES
 
 | __Data type Alfresco__ | __Mapping Conventions__ |
 |-------------|------------|
@@ -43,11 +65,11 @@ Example:
 ### Output
 * Upload Status (ok/ko)
 * Alfresco Noderef (ObjectID)
-* ErrorLog (if any)
+* ErrorLog (if any). *Please note*: errors are in output and the transformations never get aborted by an error.
 
-### Errors
 
-Errors are in output and the transformations never get aborted by an error.
+
+
 
 
 
