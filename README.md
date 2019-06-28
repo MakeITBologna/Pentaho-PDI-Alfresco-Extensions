@@ -89,7 +89,9 @@ Example:
 
 Pentaho PDI Extensions is compatible with PDI version 7 and above
 
+## License
 
+Pentaho PDI Extensions is licensed under the terms of GNU GENERAL PUBLIC LICENSE Version 3.
 
 
 
