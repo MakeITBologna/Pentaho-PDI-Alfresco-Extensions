@@ -80,7 +80,14 @@ Example:
 * Alfresco Noderef (ObjectID)
 * ErrorLog (if any). *Please note*: errors are in output and the transformations never get aborted by an error.
 
+## HOW TO INSTALL
 
+1) Downloaded last version of extensions from releases page:https://github.com/MakeITBologna/Pentaho-PDI-Alfresco-Extensions/releases
+2) Unzip the downloaded file in plugins directory of Pentaho Data Integration
+
+## COMPATIBILITY
+
+Pentaho PDI Extensions is compatible with PDI version 7 and above
 
 
 
