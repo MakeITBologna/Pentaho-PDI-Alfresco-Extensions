@@ -8,6 +8,7 @@ The extension permits to:
 * **download** document from Alfresco
 * get document **properties and relations**
 * **upload** documents to Alfresco, specifying  DocumentType, Metadata, Destination Folder and to get output in a human-readable format. 
+* **update** document properties
 
 ## Query
 ### Input
