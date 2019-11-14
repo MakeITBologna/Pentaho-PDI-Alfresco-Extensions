@@ -53,7 +53,7 @@ import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepHelper;
 @Step(id = "AlfrescoQueryStep", 
 		name = "AlfrescoQueryStep.Name", 
 		description = "AlfrescoQueryStep.TooltipDesc", 
-		image = "it/makeit/pentaho/steps/alfresco/upload/resources/alfresco_query.svg", 
+		image = "it/makeit/pentaho/steps/alfresco/query/resources/alfresco_query.svg", 
 		categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Input", 
 		i18nPackageName = "it.makeit.pentaho.steps.alfresco.query", documentationUrl = "AlfrescoQueryStep.DocumentationURL", 
 		casesUrl = "AlfrescoQueryStep.CasesURL", forumUrl = "AlfrescoQueryStep.ForumURL")
