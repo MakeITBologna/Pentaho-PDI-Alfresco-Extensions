@@ -50,6 +50,7 @@ No output
 * Username Alfresco
 * Password Alfresco
 * Path of the file to upload
+* Filename of the uploaded file
 * Path of Alfresco directory
 * DocumentType in Alfresco
 * CMIS properties expressed in JSON format
