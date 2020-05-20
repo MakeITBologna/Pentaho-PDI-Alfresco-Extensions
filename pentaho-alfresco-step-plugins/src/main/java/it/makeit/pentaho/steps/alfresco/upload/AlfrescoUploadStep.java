@@ -49,6 +49,7 @@ import com.google.common.base.Strings;
 
 import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepHelper;
 import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepJsonHelper;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExistsException;
 
 public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 
@@ -77,7 +78,7 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 
 		Object[] r = getRow();
 
-		// se non ci sono più row interrompo l'esecuzione
+		// se non ci sono piÃ¹ row interrompo l'esecuzione
 		if (r == null) {
 			setOutputDone();
 			return false;
@@ -193,13 +194,37 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 				String filename = cmisFilename;
 				if(propertiesMap.containsKey("cmis:name")) {
 					filename = (String) propertiesMap.get("cmis:name");
-				}
+				} else {
+                    propertiesMap.put("cmis:name", filename);
+                }
 				
-				document = AlfrescoStepHelper.createDocument(session, folder.getId(), filename, -1, "application/octet-stream", inputStream, new HashMap<String, Object>(), new ArrayList<>(), cmisDocType);
-			
-				if(!propertiesMap.isEmpty()) { // per gestione aspetti
-					AlfrescoStepHelper.updateDocumentProperties(session, document.getId(), propertiesMap);
-				}
+                int extIndex = filename.lastIndexOf(".");
+                if (extIndex < 0) {
+                    extIndex = filename.length();
+                }
+                String fileBase = filename.substring(0, extIndex);
+                String fileExt = extIndex < filename.length() ? filename.substring(extIndex) : "";
+                int counter = 1;
+                do {
+                    try {
+                        document = AlfrescoStepHelper.createDocument(session, folder.getId(), filename, -1, "application/octet-stream", inputStream, new HashMap<String, Object>(), new ArrayList<>(), cmisDocType);
+
+                        if(!propertiesMap.isEmpty()) { // per gestione aspetti
+                            AlfrescoStepHelper.updateDocumentProperties(session, document.getId(), propertiesMap);
+                        }
+                    } catch (CmisContentAlreadyExistsException e) {
+                        filename = String.format(
+                                "%s-%d",
+                                fileBase,
+                                counter
+                        );
+                        if (fileExt.length() > 0) {
+                            filename += String.format(".%s", fileExt);
+                        }
+                        propertiesMap.put("cmis:name", filename);
+                        outputRow[data.outputRowMeta.indexOfValue(meta.getCmisFilename())] = filename;
+                    }
+                } while (document == null && counter < 100);
 			
 			} catch(Exception e) {
 				// su indicazione di Riccardo Arzenton
