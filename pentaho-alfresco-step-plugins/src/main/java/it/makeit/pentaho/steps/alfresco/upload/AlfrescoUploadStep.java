@@ -166,7 +166,7 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			if(Strings.isNullOrEmpty(cmisPassword)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisPassword")));
 			
 			if(Strings.isNullOrEmpty(fileUpload)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.fileUpload")));
-			if(Strings.isNullOrEmpty(cmisFilename)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisFilename")));
+			// if(Strings.isNullOrEmpty(cmisFilename)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisFilename")));
 			if(Strings.isNullOrEmpty(cmisDirectory)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisDirectory")));
 			
 			
@@ -190,8 +190,12 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			
 			Document document = null;
 			try {
-				
-				String filename = cmisFilename;
+                String filename;
+				if (Strings.isNullOrEmpty(cmisFilename)) {
+                    filename = file.getName();
+                } else {
+    				filename = cmisFilename;
+                }
 				if(propertiesMap.containsKey("cmis:name")) {
 					filename = (String) propertiesMap.get("cmis:name");
 				} else {
