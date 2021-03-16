@@ -49,6 +49,7 @@ import com.google.common.base.Strings;
 
 import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepHelper;
 import it.makeit.pentaho.steps.alfresco.helper.AlfrescoStepJsonHelper;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExistsException;
 
 public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 
@@ -77,7 +78,7 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 
 		Object[] r = getRow();
 
-		// se non ci sono più row interrompo l'esecuzione
+		// se non ci sono piÃ¹ row interrompo l'esecuzione
 		if (r == null) {
 			setOutputDone();
 			return false;
@@ -152,6 +153,7 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			}
 
 			String fileUpload = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getFileUpload())];
+			String cmisFilename = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisFilename())];
 			String cmisDirectory = (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisDirectory())];
 
 			String cmisDocType = meta.getCmisDocumentType() != null ? (String) outputRow[data.outputRowMeta.indexOfValue(meta.getCmisDocumentType())] : null; 
@@ -164,6 +166,7 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			if(Strings.isNullOrEmpty(cmisPassword)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisPassword")));
 			
 			if(Strings.isNullOrEmpty(fileUpload)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.fileUpload")));
+			// if(Strings.isNullOrEmpty(cmisFilename)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisFilename")));
 			if(Strings.isNullOrEmpty(cmisDirectory)) errors.add(BaseMessages.getString(PKG, "AlfrescoUploadStep.Error.NoInputField", BaseMessages.getString(PKG, "AlfrescoUploadStep.ui.cmisDirectory")));
 			
 			
@@ -187,17 +190,45 @@ public class AlfrescoUploadStep extends BaseStep implements StepInterface {
 			
 			Document document = null;
 			try {
-				
-				String filename = file.getName();
+                String filename;
+				if (Strings.isNullOrEmpty(cmisFilename)) {
+                    filename = file.getName();
+                } else {
+    				filename = cmisFilename;
+                }
 				if(propertiesMap.containsKey("cmis:name")) {
 					filename = (String) propertiesMap.get("cmis:name");
-				}
+				} else {
+                    propertiesMap.put("cmis:name", filename);
+                }
 				
-				document = AlfrescoStepHelper.createDocument(session, folder.getId(), filename, -1, "application/octet-stream", inputStream, new HashMap<String, Object>(), new ArrayList<>(), cmisDocType);
-			
-				if(!propertiesMap.isEmpty()) { // per gestione aspetti
-					AlfrescoStepHelper.updateDocumentProperties(session, document.getId(), propertiesMap);
-				}
+                int extIndex = filename.lastIndexOf(".");
+                if (extIndex < 0) {
+                    extIndex = filename.length();
+                }
+                String fileBase = filename.substring(0, extIndex);
+                String fileExt = extIndex < filename.length() ? filename.substring(extIndex) : "";
+                int counter = 1;
+                do {
+                    try {
+                        document = AlfrescoStepHelper.createDocument(session, folder.getId(), filename, -1, "application/octet-stream", inputStream, new HashMap<String, Object>(), new ArrayList<>(), cmisDocType);
+
+                        if(!propertiesMap.isEmpty()) { // per gestione aspetti
+                            AlfrescoStepHelper.updateDocumentProperties(session, document.getId(), propertiesMap);
+                        }
+                    } catch (CmisContentAlreadyExistsException e) {
+                        filename = String.format(
+                                "%s-%d",
+                                fileBase,
+                                counter
+                        );
+                        if (fileExt.length() > 0) {
+                            filename += String.format(".%s", fileExt);
+                        }
+                        propertiesMap.put("cmis:name", filename);
+                        outputRow[data.outputRowMeta.indexOfValue(meta.getCmisFilename())] = filename;
+                    }
+                } while (document == null && counter < 100);
 			
 			} catch(Exception e) {
 				// su indicazione di Riccardo Arzenton

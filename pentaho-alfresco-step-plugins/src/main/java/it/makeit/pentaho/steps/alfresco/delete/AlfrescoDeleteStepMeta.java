@@ -1,4 +1,4 @@
-package it.makeit.pentaho.steps.alfresco.upload;
+package it.makeit.pentaho.steps.alfresco.delete;
 
 import java.util.List;
 
@@ -30,17 +30,17 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
-@Step(id = "AlfrescoUploadStep", 
-		name = "AlfrescoUploadStep.Name", 
-		description = "AlfrescoUploadStep.TooltipDesc", 
-		image = "it/makeit/pentaho/steps/alfresco/upload/resources/alfresco_upload.svg", 
+@Step(id = "AlfrescoDeleteStep", 
+		name = "AlfrescoDeleteStep.Name", 
+		description = "AlfrescoDeleteStep.TooltipDesc", 
+		image = "it/makeit/pentaho/steps/alfresco/delete/resources/alfresco_delete.svg", 
 		categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Output", 
-		i18nPackageName = "it.makeit.pentaho.steps.alfresco.upload", documentationUrl = "AlfrescoUploadStep.DocumentationURL", 
-		casesUrl = "AlfrescoUploadStep.CasesURL", forumUrl = "AlfrescoUploadStep.ForumURL")
-@InjectionSupported(localizationPrefix = "AlfrescoUploadStepMeta.Injection.")
-public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInterface {
+		i18nPackageName = "it.makeit.pentaho.steps.alfresco.delete", documentationUrl = "AlfrescoDeleteStep.DocumentationURL", 
+		casesUrl = "AlfrescoDeleteStep.CasesURL", forumUrl = "AlfrescoDeleteStep.ForumURL")
+@InjectionSupported(localizationPrefix = "AlfrescoDeleteStepMeta.Injection.")
+public class AlfrescoDeleteStepMeta extends BaseStepMeta implements StepMetaInterface {
 
-	private static final Class<?> PKG = AlfrescoUploadStepMeta.class; // for i18n purposes
+	private static final Class<?> PKG = AlfrescoDeleteStepMeta.class; // for i18n purposes
 
 	
 	public static Integer PATH = 0, OBJECT_ID = 1;
@@ -52,20 +52,8 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 	@Injection(name = "CMIS_PASSOWRD")
 	private String cmisPassword;
 
-	@Injection(name = "FILE_UPLOAD")
-	private String fileUpload;
-	@Injection(name = "CMIS_FILENAME")
-	private String cmisFilename;
-	@Injection(name = "CMIS_DIRECTORY")
-	private String cmisDirectory;
-	@Injection(name = "CMIS_DIRECTORY_TYPE")
-	private Integer cmisDirectoryType;
-
-	
-	@Injection(name = "CMIS_DOCUMENT_TYPE")
-	private String cmisDocumentType;
-	@Injection(name = "CMIS_PROPERTIES")
-	private String cmisProperties;
+	@Injection(name = "DOCUMENT_ID")
+	private String documentId;
 	
 	@Injection(name = "OUTPUT_STATUS")
 	private String outputStatus;
@@ -74,7 +62,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 	@Injection(name = "OUTPUT_OBJECT_ID")
 	private String outputObjectId;
 
-	public AlfrescoUploadStepMeta() {
+	public AlfrescoDeleteStepMeta() {
 		super();
 	}
 
@@ -85,12 +73,12 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 
 	@Override
 	public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta, Trans trans) {
-		return new AlfrescoUploadStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
+		return new AlfrescoDeleteStep(stepMeta, stepDataInterface, copyNr, transMeta, trans);
 	}
 
 	@Override
 	public StepDataInterface getStepData() {
-		return new AlfrescoUploadStepData();
+		return new AlfrescoDeleteStepData();
 	}
 
 	@Override
@@ -124,15 +112,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 		xml.append(XMLHandler.addTagValue("cmisUser", cmisUser));
 		xml.append(XMLHandler.addTagValue("cmisPassword", cmisPassword));
 
-		xml.append(XMLHandler.addTagValue("fileUpload", fileUpload));
-		xml.append(XMLHandler.addTagValue("cmisFilename", cmisFilename));
-		xml.append(XMLHandler.addTagValue("cmisDirectory", cmisDirectory));
-		if(cmisDirectoryType != null) {
-			xml.append(XMLHandler.addTagValue("cmisDirectoryType", cmisDirectoryType));
-		}
-
-		xml.append(XMLHandler.addTagValue("cmisDocumentType", cmisDocumentType));
-		xml.append(XMLHandler.addTagValue("cmisProperties", cmisProperties));
+		xml.append(XMLHandler.addTagValue("documentId", documentId));
 		
 		xml.append(XMLHandler.addTagValue("outputStatus", outputStatus));
 		xml.append(XMLHandler.addTagValue("outputError", outputError));
@@ -147,15 +127,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 			setCmisUser(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisUser")));
 			setCmisPassword(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisPassword")));
 
-			setFileUpload(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "fileUpload")));
-			setCmisFilename(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisFilename")));
-			setCmisDirectory(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisDirectory")));
-			
-			String directoryType = XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisDirectoryType"));
-			setCmisDirectoryType(directoryType != null ? Integer.parseInt(directoryType) : PATH);
-
-			setCmisDocumentType(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisDocumentType")));
-			setCmisProperties(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "cmisProperties")));
+			setDocumentId(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "documentId")));
 
 			setOutputStatus(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "outputStatus")));
 			setOutputError(XMLHandler.getNodeValue(XMLHandler.getSubNode(stepnode, "outputError")));
@@ -163,7 +135,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 			
 			
 		} catch (Exception e) {
-			throw new KettleXMLException("Alfresco Upload Step plugin unable to read step info from XML node", e);
+			throw new KettleXMLException("Alfresco Delete Step plugin unable to read step info from XML node", e);
 		}
 	}
 
@@ -174,15 +146,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 			rep.saveStepAttribute(id_transformation, id_step, "cmisUser", cmisUser); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "cmisPassword", cmisPassword); //$NON-NLS-1$
 
-			rep.saveStepAttribute(id_transformation, id_step, "fileUpload", fileUpload); //$NON-NLS-1$
-			rep.saveStepAttribute(id_transformation, id_step, "cmisFilename", cmisFilename); //$NON-NLS-1$
-			rep.saveStepAttribute(id_transformation, id_step, "cmisDirectory", cmisDirectory); //$NON-NLS-1$
-			if(cmisDirectoryType != null) {
-				rep.saveStepAttribute(id_transformation, id_step, "cmisDirectoryType", cmisDirectoryType); //$NON-NLS-1$
-			}
-
-			rep.saveStepAttribute(id_transformation, id_step, "cmisDocumentType", cmisDocumentType); //$NON-NLS-1$
-			rep.saveStepAttribute(id_transformation, id_step, "cmisProperties", cmisProperties); //$NON-NLS-1$
+			rep.saveStepAttribute(id_transformation, id_step, "documentId", documentId); //$NON-NLS-1$
 			
 			rep.saveStepAttribute(id_transformation, id_step, "outputStatus", outputStatus); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "outputError", outputError); //$NON-NLS-1$
@@ -199,18 +163,7 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 			cmisUser = rep.getStepAttributeString(id_step, "cmisUser"); //$NON-NLS-1$
 			cmisPassword = rep.getStepAttributeString(id_step, "cmisPassword"); //$NON-NLS-1$
 
-			fileUpload = rep.getStepAttributeString(id_step, "fileUpload"); //$NON-NLS-1$
-			cmisFilename = rep.getStepAttributeString(id_step, "cmisFilename"); //$NON-NLS-1$
-			cmisDirectory = rep.getStepAttributeString(id_step, "cmisDirectory"); //$NON-NLS-1$
-			
-			String cmisDirectoryType = rep.getStepAttributeString(id_step, "cmisDirectoryType");
-			if(cmisDirectoryType != null) {
-				this.cmisDirectoryType = Integer.parseInt(cmisDirectoryType);  //$NON-NLS-1$	
-			}
-			
-
-			cmisDocumentType = rep.getStepAttributeString(id_step, "cmisDocumentType"); //$NON-NLS-1$
-			cmisProperties = rep.getStepAttributeString(id_step, "cmisProperties"); //$NON-NLS-1$
+			documentId = rep.getStepAttributeString(id_step, "documentId"); //$NON-NLS-1$
 			
 			outputStatus = rep.getStepAttributeString(id_step, "outputStatus"); //$NON-NLS-1$
 			outputError = rep.getStepAttributeString(id_step, "outputError"); //$NON-NLS-1$
@@ -225,10 +178,10 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 	public void check(List<CheckResultInterface> remarks, TransMeta transMeta, StepMeta stepMeta, RowMetaInterface prev, String[] input, String[] output, RowMetaInterface info, VariableSpace space, Repository repository, IMetaStore metaStore) {
 		
 		if (input != null && input.length > 0) {
-			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "AlfrescoUploadStep.CheckResult.ReceivingRows.OK"), stepMeta);
+			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "AlfrescoDeleteStep.CheckResult.ReceivingRows.OK"), stepMeta);
 			remarks.add(cr);
 		} else {
-			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "AlfrescoUploadStep.CheckResult.ReceivingRows.ERROR"), stepMeta);
+			CheckResult cr = new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "AlfrescoDeleteStep.CheckResult.ReceivingRows.ERROR"), stepMeta);
 			remarks.add(cr);
 		}
 		
@@ -265,20 +218,12 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 		this.cmisPassword = cmisPassword;
 	}
 
-	public String getCmisDirectory() {
-		return cmisDirectory;
+	public String getDocumentId() {
+		return documentId;
 	}
 
-	public void setCmisDirectory(String cmisDirectory) {
-		this.cmisDirectory = cmisDirectory;
-	}
-	
-	public Integer getCmisDirectoryType() {
-		return cmisDirectoryType;
-	}
-
-	public void setCmisDirectoryType(Integer cmisDirectoryType) {
-		this.cmisDirectoryType = cmisDirectoryType;
+	public void setDocumentId(String documentId) {
+		this.documentId = documentId;
 	}
 
 	public String getOutputStatus() {
@@ -304,37 +249,5 @@ public class AlfrescoUploadStepMeta extends BaseStepMeta implements StepMetaInte
 	public void setOutputObjectId(String outputObjectId) {
 		this.outputObjectId = outputObjectId;
 	}
-
-	public String getFileUpload() {
-		return fileUpload;
-	}
-
-	public void setFileUpload(String fileUpload) {
-		this.fileUpload = fileUpload;
-	}
-
-	public String getCmisDocumentType() {
-		return cmisDocumentType;
-	}
-
-	public void setCmisDocumentType(String cmisDocumentType) {
-		this.cmisDocumentType = cmisDocumentType;
-	}
-
-	public String getCmisProperties() {
-		return cmisProperties;
-	}
-
-	public void setCmisProperties(String cmisProperties) {
-		this.cmisProperties = cmisProperties;
-	}
-
-    public String getCmisFilename() {
-        return cmisFilename;
-    }
-
-    public void setCmisFilename(String cmisFilename) {
-        this.cmisFilename = cmisFilename;
-    }
 
 }

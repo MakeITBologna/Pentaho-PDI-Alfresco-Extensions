@@ -1,4 +1,4 @@
-package it.makeit.pentaho.steps.alfresco.upload;
+package it.makeit.pentaho.steps.alfresco.delete;
 
 import java.util.Arrays;
 
@@ -34,40 +34,29 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 import com.google.common.base.Strings;
 
-public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDialogInterface {
+public class AlfrescoDeleteStepDialog extends BaseStepDialog implements StepDialogInterface {
 
 	
 	
 	
-	private static Class<?> PKG = AlfrescoUploadStepMeta.class; // for i18n purposes
+	private static Class<?> PKG = AlfrescoDeleteStepMeta.class; // for i18n purposes
 
-	private AlfrescoUploadStepMeta meta;
+	private AlfrescoDeleteStepMeta meta;
 
 	
 	private LabelCombo wCmisUrl;
 	private LabelCombo wCmisUser;
 	private LabelCombo wCmisPassword;
 
-	private LabelCombo wFileUpload;
-    private LabelCombo wCmisFilename;
-	private LabelCombo wCmisDirectory;
-	private LabelCombo wCmisDirectoryType;
-
-	private LabelCombo wCmisDoctype;
-	private LabelCombo wCmisProperties;
+	private LabelCombo wDocumentId;
 
 	private LabelText wOutputStatus;
 	private LabelText wOutputObjectId;
 	private LabelText wOutputError;
-
-	private String[] cmisDirectoryTypes = new String[] {
-    		BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDirectoryTypePath" ),  
-    		BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDirectoryTypeObjectId" ) 
-    	};
 	
-	public AlfrescoUploadStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
+	public AlfrescoDeleteStepDialog(Shell parent, Object in, TransMeta transMeta, String sname) {
 		super(parent, (BaseStepMeta) in, transMeta, sname);
-		meta = (AlfrescoUploadStepMeta) in;
+		meta = (AlfrescoDeleteStepMeta) in;
 	}
 
 	@Override
@@ -99,7 +88,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    
 	    
 	    shell.setLayout( formLayout );
-	    shell.setText( BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.title" ) );
+	    shell.setText( BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.title" ) );
 	    
 	    
 	    int middle = props.getMiddlePct();
@@ -131,7 +120,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    
 	    Group alfrescoGroup = new Group(shell, SWT.SHADOW_NONE);
 	    props.setLook(alfrescoGroup);
-	    alfrescoGroup.setText(BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.groupAlfresco" ));
+	    alfrescoGroup.setText(BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.groupAlfresco" ));
 	    FormData fdAlfrescoGroup = new FormData();
 	    fdAlfrescoGroup.left = new FormAttachment( 0, 0 );
 	    fdAlfrescoGroup.right = new FormAttachment( 100, 0 );
@@ -146,7 +135,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 
 	    
 	    // RIGA CMIS URL
-	    wCmisUrl = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisUrl" ), null );
+	    wCmisUrl = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.cmisUrl" ), null );
 	    setComboFieldField(wCmisUrl);
 	    props.setLook( wCmisUrl );
 	    wCmisUrl.addModifyListener( lsMod );
@@ -157,7 +146,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    wCmisUrl.setLayoutData( fdCmisUrl );
 	    
 	    // RIGA CMIS USER
-	    wCmisUser = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisUser" ), null );
+	    wCmisUser = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.cmisUser" ), null );
 	    setComboFieldField(wCmisUser);
 	    props.setLook( wCmisUser );
 	    wCmisUser.addModifyListener( lsMod );
@@ -168,7 +157,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    wCmisUser.setLayoutData( fdCmisUser );
 	    
 	    // RIGA CMIS PASSWORD
-	    wCmisPassword = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisPassword" ), null );
+	    wCmisPassword = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.cmisPassword" ), null );
 	    setComboFieldField(wCmisPassword);
 		props.setLook( wCmisPassword );
 	    wCmisPassword.addModifyListener( lsMod );
@@ -179,78 +168,19 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    wCmisPassword.setLayoutData( fdCmisPassword );
 	    
 	    // RIGA FILE UPLOAD
-	    wFileUpload = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.fileUpload" ), null );
-	    setComboFieldField(wFileUpload);
-	    props.setLook( wFileUpload );
-	    wFileUpload.addModifyListener( lsMod );
-	    FormData fdFileUpload = new FormData();
-	    fdFileUpload.left = new FormAttachment( 0, 0 );
-	    fdFileUpload.right = new FormAttachment( 100, 0 );
-	    fdFileUpload.top = new FormAttachment( wCmisPassword, margin );
-	    wFileUpload.setLayoutData( fdFileUpload );
-
-	    // CMIS FILENAME
-	    wCmisFilename = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisFilename" ), null );
-	    setComboFieldField(wCmisFilename);
-	    props.setLook( wCmisFilename );
-	    wCmisFilename.addModifyListener( lsMod );
-	    FormData fdCmisFilename = new FormData();
-	    fdCmisFilename.left = new FormAttachment( 0, 0 );
-	    fdCmisFilename.right = new FormAttachment( 100, 0 );
-	    fdCmisFilename.top = new FormAttachment( wFileUpload, margin );
-	    wCmisFilename.setLayoutData( fdCmisFilename );
-	    
-	    // RIGA CMIS DIRECTORY
-	    wCmisDirectory = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDirectory" ), null );
-	    setComboFieldField(wCmisDirectory);
-	    props.setLook( wCmisDirectory );
-	    wCmisDirectory.addModifyListener( lsMod );
-	    FormData fdCmisDirectory = new FormData();
-	    fdCmisDirectory.left = new FormAttachment( 0, 0 );
-	    fdCmisDirectory.right = new FormAttachment( 100, 0 );
-	    fdCmisDirectory.top = new FormAttachment( wCmisFilename, margin );
-	    wCmisDirectory.setLayoutData( fdCmisDirectory );
-	    
-	    // RIGA CMIS DIRECTORY Type
-		wCmisDirectoryType = new LabelCombo( alfrescoGroup, SWT.READ_ONLY, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDirectoryType" ), null );
-	    wCmisDirectoryType.setItems(cmisDirectoryTypes);
-	    wCmisDirectoryType.setText(cmisDirectoryTypes[0]);
-	    props.setLook( wCmisDirectoryType );
-	    wCmisDirectoryType.addModifyListener( lsMod );
-		FormData fdCmisDirectoryIsObjectID = new FormData();
-	    fdCmisDirectoryIsObjectID.left = new FormAttachment( 0, 0 );
-	    fdCmisDirectoryIsObjectID.right = new FormAttachment( 100, 0 );
-	    fdCmisDirectoryIsObjectID.top = new FormAttachment( wCmisDirectory, margin );
-	    wCmisDirectoryType.setLayoutData( fdCmisDirectoryIsObjectID );
-	    
-	    
-	    
-	    // RIGA CMIS DOC TYPE
-	    wCmisDoctype = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisDocType" ), null );
-	    setComboFieldField(wCmisDoctype);
-	    props.setLook( wCmisDoctype );
-	    wCmisDoctype.addModifyListener( lsMod );
-	    FormData fdCmisDocType = new FormData();
-	    fdCmisDocType.left = new FormAttachment( 0, 0 );
-	    fdCmisDocType.right = new FormAttachment( 100, 0 );
-	    fdCmisDocType.top = new FormAttachment( wCmisDirectoryType, margin );
-	    wCmisDoctype.setLayoutData( fdCmisDocType );
-	    
-	    // RIGA CMIS DIRECTORY
-	    wCmisProperties = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.cmisProperties" ), null );
-	    setComboFieldField(wCmisProperties);
-	    props.setLook( wCmisProperties );
-	    wCmisProperties.addModifyListener( lsMod );
-	    FormData fdCmisProperties = new FormData();
-	    fdCmisProperties.left = new FormAttachment( 0, 0 );
-	    fdCmisProperties.right = new FormAttachment( 100, 0 );
-	    fdCmisProperties.top = new FormAttachment( wCmisDoctype, margin );
-	    wCmisProperties.setLayoutData( fdCmisProperties );
-	    
+	    wDocumentId = new LabelCombo( alfrescoGroup, BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.cmisDocumentId" ), null );
+	    setComboFieldField(wDocumentId);
+	    props.setLook( wDocumentId );
+	    wDocumentId.addModifyListener( lsMod );
+	    FormData fdDocumentId = new FormData();
+	    fdDocumentId.left = new FormAttachment( 0, 0 );
+	    fdDocumentId.right = new FormAttachment( 100, 0 );
+	    fdDocumentId.top = new FormAttachment( wCmisPassword, margin );
+	    wDocumentId.setLayoutData( fdDocumentId );
 	    
 	    Group outputGroup = new Group(shell, SWT.SHADOW_NONE);
 	    props.setLook(outputGroup);
-	    outputGroup.setText(BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.groupOutput" ));
+	    outputGroup.setText(BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.groupOutput" ));
 	    FormData fdOutputGroup = new FormData();
 	    fdOutputGroup.left = new FormAttachment( 0, 0 );
 	    fdOutputGroup.right = new FormAttachment( 100, 0 );
@@ -264,7 +194,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    outputGroup.setLayout(outputFormLayout);
 
 	    // RIGA STATUS
-	    wOutputStatus = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.outputStatus" ), null );
+	    wOutputStatus = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.outputStatus" ), null );
 	    props.setLook( wOutputStatus );
 	    wOutputStatus.addModifyListener( lsMod );
 	    FormData fdOutputStatus = new FormData();
@@ -274,7 +204,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    wOutputStatus.setLayoutData( fdOutputStatus );
 	    
 	    // RIGA OBJECT ID
-	    wOutputObjectId = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.outputObjectId" ), null );
+	    wOutputObjectId = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.outputObjectId" ), null );
 	    props.setLook( wOutputObjectId );
 	    wOutputObjectId.addModifyListener( lsMod );
 	    FormData fdOutputObjectId = new FormData();
@@ -285,7 +215,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    
 	   
 	    // RIGA ERROR
-	    wOutputError = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.outputError" ), null );
+	    wOutputError = new LabelText( outputGroup, BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.outputError" ), null );
 		props.setLook( wOutputError );
 		wOutputError.addModifyListener( lsMod );
 	    FormData fdOutputError = new FormData();
@@ -326,10 +256,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	    wCmisUser.addSelectionListener( lsDef );
 	    wCmisPassword.addSelectionListener( lsDef );
 
-	    wFileUpload.addSelectionListener( lsDef );
-        wCmisFilename.addSelectionListener( lsDef );
-	    wCmisDirectory.addSelectionListener( lsDef );
-	    wCmisDirectoryType.addSelectionListener( lsDef );
+	    wDocumentId.addSelectionListener( lsDef );
 
 	    // X o ALT-F4
 	    shell.addShellListener( new ShellAdapter() {
@@ -379,14 +306,7 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 		meta.setCmisUser(!Strings.isNullOrEmpty(wCmisUser.getText()) ? wCmisUser.getText() : null);
 		meta.setCmisPassword(!Strings.isNullOrEmpty(wCmisPassword.getText()) ? wCmisPassword.getText() : null);
 
-		meta.setFileUpload(!Strings.isNullOrEmpty(wFileUpload.getText()) ? wFileUpload.getText() : null);
-		meta.setCmisFilename(!Strings.isNullOrEmpty(wCmisFilename.getText()) ? wCmisFilename.getText() : null);
-		meta.setCmisDirectory(!Strings.isNullOrEmpty(wCmisDirectory.getText()) ? wCmisDirectory.getText() : null);
-		
-		meta.setCmisDirectoryType(!Strings.isNullOrEmpty(wCmisDirectoryType.getText()) ? wCmisDirectoryType.getText().equals(cmisDirectoryTypes[0]) ? 0 : 1  : 0 );
-		
-		meta.setCmisDocumentType(!Strings.isNullOrEmpty(wCmisDoctype.getText()) ? wCmisDoctype.getText() : null);
-		meta.setCmisProperties(!Strings.isNullOrEmpty(wCmisProperties.getText()) ? wCmisProperties.getText() : null);
+		meta.setDocumentId(!Strings.isNullOrEmpty(wDocumentId.getText()) ? wDocumentId.getText() : null);
 		
 		meta.setOutputStatus(!Strings.isNullOrEmpty(wOutputStatus.getText()) ? wOutputStatus.getText() : null);
 		meta.setOutputObjectId(!Strings.isNullOrEmpty(wOutputObjectId.getText()) ? wOutputObjectId.getText() : null);
@@ -407,17 +327,9 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 		if( meta.getCmisUser() != null && Arrays.asList(wCmisUser.getItems()).contains(meta.getCmisUser()) ) 	wCmisUser.setText( meta.getCmisUser() );
 		if( meta.getCmisPassword() != null && Arrays.asList(wCmisPassword.getItems()).contains(meta.getCmisPassword()) ) 	wCmisPassword.setText( meta.getCmisPassword() );
 		
-		
-		if( meta.getFileUpload() != null && Arrays.asList(wFileUpload.getItems()).contains( meta.getFileUpload()) ) 	wFileUpload.setText( meta.getFileUpload() );
-		if( meta.getCmisFilename() != null && Arrays.asList(wCmisFilename.getItems()).contains(meta.getCmisFilename()) ) 	wCmisFilename.setText( meta.getCmisFilename());
-		if( meta.getCmisDirectory() != null && Arrays.asList(wCmisDirectory.getItems()).contains(meta.getCmisDirectory()) ) 	wCmisDirectory.setText( meta.getCmisDirectory());
-		if( meta.getCmisDirectoryType() != null ) 	wCmisDirectoryType.setText( cmisDirectoryTypes[meta.getCmisDirectoryType()]);
-		
-		
-		if( meta.getCmisDocumentType() != null && Arrays.asList(wCmisDoctype.getItems()).contains( meta.getCmisDocumentType()) ) 	wCmisDoctype.setText( meta.getCmisDocumentType() );
-		if( meta.getCmisProperties() != null && Arrays.asList(wCmisProperties.getItems()).contains(meta.getCmisProperties()) ) 	wCmisProperties.setText( meta.getCmisProperties());
-		
-		if( meta.getOutputStatus() != null) 	wOutputStatus.setText( meta.getOutputStatus() );
+		if( meta.getDocumentId() != null && Arrays.asList(wDocumentId.getItems()).contains( meta.getDocumentId()) ) 	wDocumentId.setText( meta.getDocumentId() );
+
+        if( meta.getOutputStatus() != null) 	wOutputStatus.setText( meta.getOutputStatus() );
 		if( meta.getOutputObjectId() != null) 	wOutputObjectId.setText( meta.getOutputObjectId() );
 		if( meta.getOutputError() != null) 	wOutputError.setText( meta.getOutputError() );
 		
@@ -436,8 +348,8 @@ public class AlfrescoUploadStepDialog extends BaseStepDialog implements StepDial
 	      
 	    } catch ( KettleException ke ) {
 	    	new ErrorDialog( shell, 
-	    			BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.FailedToGetFields.DialogTitle" ),  
-	    			BaseMessages.getString( PKG, "AlfrescoUploadStep.ui.FailedToGetFields.DialogMessage" ), 
+	    			BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.FailedToGetFields.DialogTitle" ),  
+	    			BaseMessages.getString( PKG, "AlfrescoDeleteStep.ui.FailedToGetFields.DialogMessage" ), 
 	    			ke );
 	    }
 	  }
